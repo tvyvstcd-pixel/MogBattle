@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>MogBattle</title>
+<style>
+:root{--bg:#f6f4ff;--card:#fff;--tx:#1c1830;--mu:#6d6788;--ac:#7c3aed;--ac2:#ec4899;--bd:#e3def5;--ok:#16a34a;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#13101f;--card:#1e1a30;--tx:#f1eefc;--mu:#a49fc0;--bd:#322c4d;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#13101f;--card:#1e1a30;--tx:#f1eefc;--mu:#a49fc0;--bd:#322c4d;color-scheme:dark}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;min-height:100%}
+main{max-width:560px;margin:0 auto;padding:16px}
+h1{font-size:26px;margin:8px 0 4px;background:linear-gradient(90deg,var(--ac),var(--ac2));-webkit-background-clip:text;background-clip:text;color:transparent}
+p{color:var(--mu);margin:4px 0 12px}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:16px;padding:16px;margin:12px 0}
+button{font:inherit;font-weight:600;border:0;border-radius:12px;padding:13px 16px;width:100%;color:#fff;background:linear-gradient(90deg,var(--ac),var(--ac2));cursor:pointer}
+button.sec{background:transparent;color:var(--tx);border:1px solid var(--bd)}
+button:disabled{opacity:.5}
+input{font:inherit;width:100%;padding:13px;border-radius:12px;border:1px solid var(--bd);background:var(--bg);color:var(--tx);text-transform:uppercase;letter-spacing:4px;text-align:center;font-size:20px;margin:8px 0}
+.code{font-size:36px;letter-spacing:8px;font-weight:800;text-align:center;margin:4px 0}
+.vids{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.tile{position:relative;aspect-ratio:3/4;border-radius:14px;overflow:hidden;background:#000;border:3px solid transparent}
+.tile.on{border-color:var(--ac2);box-shadow:0 0 0 3px rgba(236,72,153,.3)}
+.tile video{width:100%;height:100%;object-fit:cover}
+.tile.me video{transform:scaleX(-1)}
+.tag{position:absolute;left:6px;bottom:6px;background:rgba(0,0,0,.6);color:#fff;font-size:12px;padding:3px 8px;border-radius:8px}
+.timer{font-size:56px;font-weight:800;text-align:center;line-height:1}
+.row{display:flex;justify-content:space-between;font-size:14px;margin:6px 0}
+.bar{height:8px;background:var(--bd);border-radius:6px;overflow:hidden}.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--ac),var(--ac2))}
+.big{font-size:44px;font-weight:800;text-align:center}
+.win{outline:2px solid var(--ac2)}
+.hide{display:none}.mu{color:var(--mu);font-size:13px}
+body{background:radial-gradient(900px 500px at 10% -10%,rgba(124,58,237,.35),transparent 60%),radial-gradient(800px 500px at 100% 10%,rgba(236,72,153,.28),transparent 60%),var(--bg);background-attachment:fixed}
+main{padding:20px 16px 40px}
+.logo{font-size:42px;font-weight:900;letter-spacing:-1.5px;text-align:center;margin-top:10px;line-height:1}
+.logo span{background:linear-gradient(90deg,var(--ac),var(--ac2));-webkit-background-clip:text;background-clip:text;color:transparent}
+.tag2{text-align:center;color:var(--mu);margin:6px 0 18px;font-weight:500}
+#home>p{text-align:center;font-size:15px;max-width:420px;margin:0 auto 14px}
+.card{border-radius:22px;padding:18px;box-shadow:0 10px 30px rgba(0,0,0,.12);backdrop-filter:blur(10px)}
+button{border-radius:16px;padding:16px;font-size:17px;box-shadow:0 8px 22px rgba(236,72,153,.35);transition:transform .12s}
+button:active{transform:scale(.97)}
+button.sec{box-shadow:none;background:var(--card)}
+input{border-radius:16px;font-weight:800;border:2px solid var(--bd)}
+input:focus{outline:none;border-color:var(--ac2)}
+.code{background:linear-gradient(90deg,var(--ac),var(--ac2));-webkit-background-clip:text;background-clip:text;color:transparent;font-size:44px;font-weight:900}
+#status{display:inline-block;width:100%;margin-top:6px}
+.vids{position:relative;gap:12px}
+.tile{border-radius:22px;border:3px solid var(--bd);box-shadow:0 10px 30px rgba(0,0,0,.25)}
+.tile.on{border-color:var(--ac2);animation:pulse 1.2s infinite}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(236,72,153,.55)}50%{box-shadow:0 0 0 10px rgba(236,72,153,0)}}
+.tag{backdrop-filter:blur(6px);font-weight:700;padding:4px 10px;border-radius:10px}
+.vs{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:3;width:46px;height:46px;border-radius:50%;display:grid;place-items:center;font-weight:900;font-size:14px;color:#fff;background:linear-gradient(135deg,var(--ac),var(--ac2));border:3px solid var(--bg);box-shadow:0 4px 16px rgba(0,0,0,.4)}
+.timer{font-size:84px;font-weight:900;background:linear-gradient(90deg,var(--ac),var(--ac2));-webkit-background-clip:text;background-clip:text;color:transparent}
+#turnTxt{font-size:15px;font-weight:600}
+.big{font-size:56px;font-weight:900;background:linear-gradient(90deg,var(--ac),var(--ac2));-webkit-background-clip:text;background-clip:text;color:transparent}
+.bar{height:10px}
+.bar i{transition:width .8s cubic-bezier(.2,.8,.2,1)}
+.win{outline:none;border:2px solid var(--ac2);box-shadow:0 0 40px rgba(236,72,153,.35)}
+#resBox{animation:pop .5s cubic-bezier(.2,1.4,.4,1)}
+@keyframes pop{from{opacity:0;transform:translateY(16px) scale(.96)}to{opacity:1;transform:none}}
+#resBox>b{display:block;text-align:center;font-size:24px!important;font-weight:900}
+.row{font-weight:500}
+</style>
+</head>
+<body>
+<main>
+<div class="logo">MOG<span>BATTLE</span></div><div class="tag2">Чьё лицо мощнее? ⚔️</div>
+
+<section id="home">
+  <p>Два человека, одно лобби. Оба одновременно смотрят в камеру 15 секунд, затем ИИ сравнивает ваши лица по 10-балльной шкале с десятыми долями.</p>
+  <div class="card">
+    <button id="create">⚔️ Создать лобби</button>
+  </div>
+  <div class="card">
+    <input id="codeIn" maxlength="5" placeholder="КОД">
+    <button id="join" class="sec">Войти по коду</button>
+  </div>
+  <div id="homeErr" class="mu"></div>
+</section>
+
+<section id="game" class="hide">
+  <div class="card"><div class="mu" style="text-align:center">Код лобби</div><div class="code" id="codeShow"></div>
+    <div class="mu" style="text-align:center" id="status">Ждём второго игрока…</div></div>
+  <div class="vids"><div class="vs">VS</div>
+    <div class="tile me" id="tMe"><video id="lv" autoplay playsinline muted></video><span class="tag">Вы</span></div>
+    <div class="tile" id="tRem"><video id="rv" autoplay playsinline></video><span class="tag">Соперник</span></div>
+  </div>
+  <div class="card hide" id="turnBox"><div class="mu" style="text-align:center" id="turnTxt"></div><div class="timer" id="timer">15</div></div>
+  <div class="card hide" id="resBox"></div>
+  <button id="start" class="hide" style="margin-top:12px">⚔️ Начать баттл</button>
+  <div id="err" class="mu" style="margin-top:10px"></div>
+</section>
+</main>
+
+<script>
+const $=s=>document.getElementById(s);
+const SUB={symmetry:["Симметрия",.25],skin:["Кожа и свежесть",.2],expression:["Выражение и улыбка",.2],grooming:["Ухоженность",.15],presence:["Харизма в кадре",.2]};
+let room,stream,pc,remote=null,myPeer=null,code="",ice=[],bufs={},frames=[[],[]],busy=false,lastTry=0,hostSent=false;
+
+function gen(){const a="ABCDEFGHJKMNPQRSTUVWXYZ23456789";let s="";for(let i=0;i<5;i++)s+=a[Math.floor(Math.random()*a.length)];return s}
+$("create").onclick=()=>enter(gen());
+$("join").onclick=()=>{const c=$("codeIn").value.trim().toUpperCase();if(c.length<5){$("homeErr").textContent="Введите 5 символов кода";return}enter(c)};
+
+async function enter(c){
+  code=c;$("homeErr").textContent="";
+  try{stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:"user",width:640,height:480},audio:true})}
+  catch(e){$("homeErr").textContent="Нужен доступ к камере и микрофону — разрешите его и попробуйте снова.";return}
+  const cl=await claude.use("room");
+  if(!cl){$("homeErr").textContent="Лобби недоступны: откройте страницу в Claude по ссылке, войдя в аккаунт.";return}
+  room=await cl.join("duel"+code.toLowerCase());
+  $("home").classList.add("hide");$("game").classList.remove("hide");$("codeShow").textContent=code;$("lv").srcObject=stream;
+  room.on("sig",onSig);room.on("game",onGame);
+  room.onPeers(ch=>{
+    const me=ch.peers.find(p=>p.isMe&&p.sameTab);if(me)myPeer=me.peer;
+    const others=ch.peers.filter(p=>!p.isMe&&p.kind==="viewer");
+    if(others.length>1){$("status").textContent="Лобби уже занято двумя игроками";stopAll();return}
+    remote=others[0]||null;
+    if(!remote){$("status").textContent="Ждём второго игрока… отправьте ему код";$("start").classList.add("hide");return}
+    $("status").textContent="Соединяемся…";tryConnect();
+  });
+  setInterval(()=>{if(remote&&(!pc||pc.connectionState!=="connected")&&Date.now()-lastTry>7000)tryConnect()},2000);
+}
+function stopAll(){try{room.leave()}catch(e){}}
+const isHost=()=>remote&&myPeer&&myPeer<remote.peer;
+const isCaller=isHost;
+
+function mk(){
+  if(pc)try{pc.close()}catch(e){}
+  ice=[];bufs={};
+  pc=new RTCPeerConnection({iceServers:[{urls:"stun:stun.l.google.com:19302"}]});
+  stream.getTracks().forEach(t=>pc.addTrack(t,stream));
+  pc.ontrack=e=>{$("rv").srcObject=e.streams[0]};
+  pc.onicecandidate=e=>{if(e.candidate)sig({k:"ice",c:e.candidate.toJSON()})};
+  pc.onconnectionstatechange=()=>{if(pc.connectionState==="connected"){$("status").textContent="Оба в сети. Камеры включены.";if(isHost()&&!busy)$("start").classList.remove("hide")}};
+}
+function sig(d){if(remote)room.emit("sig",Object.assign({to:remote.peer},d))}
+function sendSdp(desc){const id=Math.random().toString(36).slice(2,8),s=desc.sdp,n=Math.ceil(s.length/2500);
+  for(let i=0;i<n;i++)sig({k:"sdp",t:desc.type,id,i,n,p:s.slice(i*2500,(i+1)*2500)})}
+async function tryConnect(){
+  lastTry=Date.now();if(!isCaller())return;
+  mk();const o=await pc.createOffer();await pc.setLocalDescription(o);sendSdp(o);
+}
+async function onSig(m){
+  if(m.isMe||!m.data||m.data.to!==myPeer)return;const d=m.data;
+  try{
+    if(d.k==="ice"){if(pc&&pc.remoteDescription)await pc.addIceCandidate(d.c);else ice.push(d.c);return}
+    if(d.k==="sdp"){
+      const b=bufs[d.id]=bufs[d.id]||{};b[d.i]=d.p;
+      if(Object.keys(b).length<d.n)return;
+      let s="";for(let i=0;i<d.n;i++)s+=b[i];delete bufs[d.id];
+      if(d.t==="offer"){mk();await pc.setRemoteDescription({type:"offer",sdp:s});for(const c of ice)await pc.addIceCandidate(c);ice=[];
+        const a=await pc.createAnswer();await pc.setLocalDescription(a);sendSdp(a)}
+      else if(pc){await pc.setRemoteDescription({type:"answer",sdp:s});for(const c of ice)await pc.addIceCandidate(c);ice=[]}
+    }
+  }catch(e){console.error(e)}
+}
+
+/* ---- игра ---- */
+$("start").onclick=()=>runGame();
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+function snap(v){return new Promise(res=>{const c=document.createElement("canvas"),w=480,h=Math.round(w*(v.videoHeight||480)/(v.videoWidth||640));c.width=w;c.height=h;c.getContext("2d").drawImage(v,0,0,w,h);c.toBlob(res,"image/jpeg",.85)})}
+async function runGame(){
+  busy=true;$("start").classList.add("hide");$("err").textContent="";frames=[[],[]];
+  room.emit("game",{t:"reset"});
+  room.emit("game",{t:"go"});
+  await sleep(4000);frames[0].push(await snap($("lv")));frames[1].push(await snap($("rv")));
+  await sleep(7000);frames[0].push(await snap($("lv")));frames[1].push(await snap($("rv")));
+  await sleep(4000);
+  room.emit("game",{t:"judging"});
+  try{
+    const sample=await claude.use("sample");
+    if(!sample||!(await sample.limits()).images)throw new Error("Анализ изображений недоступен");
+    const prompt=`Это развлекательная игра для двух взрослых, которые добровольно участвуют. Даны 4 кадра: кадры 1–2 — игрок A, кадры 3–4 — игрок B.
+Оцени только видимое эстетическое впечатление по фиксированным критериям, каждую от 1.0 до 10.0 с одним знаком после запятой: symmetry (симметрия черт), skin (кожа и свежесть), expression (выражение лица и улыбка), grooming (ухоженность, причёска), presence (харизма и подача в кадре). Учитывай, что освещение и ракурс не должны сильно влиять. Оценивай последовательно по одной и той же шкале, различай игроков, избегай одинаковых значений. Не упоминай расу, возраст, здоровье. В note напиши одну тёплую короткую фразу по-русски про сильную сторону игрока.
+Верни только JSON: {"a":{"symmetry":0,"skin":0,"expression":0,"grooming":0,"presence":0,"note":""},"b":{...то же}}`;
+    const r=await sample.json(prompt,{images:[...frames[0],...frames[1]],cache:true});
+    const fin=o=>{let s=0;for(const k in SUB)s+=Math.min(10,Math.max(1,+o[k]||1))*SUB[k][1];return Math.round(s*10)/10};
+    const pack=o=>({f:fin(o),s:Object.fromEntries(Object.keys(SUB).map(k=>[k,Math.round(Math.min(10,Math.max(1,+o[k]||1))*10)/10])),n:String(o.note||"").slice(0,160)});
+    room.emit("game",{t:"result",a:pack(r.a),b:pack(r.b)});
+  }catch(e){
+    room.emit("game",{t:"fail"});
+    $("err").textContent="Не удалось оценить: "+(e&&e.message||e.code||"ошибка")+". Попробуйте ещё раз.";
+  }
+  busy=false;
+}
+let tmr;
+function onGame(m){
+  const d=m.data;if(!d)return;
+  if(d.t==="reset"){$("resBox").classList.add("hide");$("start").classList.add("hide")}
+  if(d.t==="go"){
+    clearInterval(tmr);$("resBox").classList.add("hide");$("turnBox").classList.remove("hide");
+    $("tMe").classList.add("on");$("tRem").classList.add("on");
+    $("turnTxt").textContent="15 секунд — смотрите в камеру оба!";
+    let t=15;$("timer").textContent=t;tmr=setInterval(()=>{t--;$("timer").textContent=Math.max(t,0);if(t<=0)clearInterval(tmr)},1000);
+  }
+  if(d.t==="judging"){clearInterval(tmr);$("tMe").classList.remove("on");$("tRem").classList.remove("on");$("turnTxt").textContent="ИИ анализирует кадры…";$("timer").textContent="…"}
+  if(d.t==="fail"){$("turnBox").classList.add("hide");if(isHost())$("start").classList.remove("hide")}
+  if(d.t==="result"){$("turnBox").classList.add("hide");show(d)}
+}
+function esc(s){const e=document.createElement("span");e.textContent=s;return e.innerHTML}
+function show(d){
+  const me=isHost()?d.a:d.b,ot=isHost()?d.b:d.a;
+  const win=me.f===ot.f?0:me.f>ot.f?1:-1;
+  const card=(t,o,w)=>`<div class="card ${w?"win":""}" style="margin:8px 0"><b>${t}${w?" 🏆":""}</b><div class="big">${o.f.toFixed(1)}</div>`+
+    Object.keys(SUB).map(k=>`<div class="row"><span>${SUB[k][0]}</span><span>${o.s[k].toFixed(1)}</span></div><div class="bar"><i style="width:${o.s[k]*10}%"></i></div>`).join("")+
+    `<p style="margin-top:10px">${esc(o.n)}</p></div>`;
+  $("resBox").innerHTML=`<b style="font-size:18px">${win===0?"Ничья!":win>0?"Вы победили!":"Победил соперник"}</b>`+card("Вы",me,win>0)+card("Соперник",ot,win<0)+
+    `<p class="mu">Игра для развлечения: оценка субъективна, считается по взвешенным критериям (симметрия, кожа, выражение, ухоженность, харизма).</p>`;
+  $("resBox").classList.remove("hide");if(isHost())$("start").textContent="Сыграть ещё раз",$("start").classList.remove("hide");
+}
+</script>
+</body>
+</html>
