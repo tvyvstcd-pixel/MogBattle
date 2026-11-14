@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>MogBattle</title>
+<style>
+:root{--bg:#f6f4ff;--card:#fff;--tx:#1c1830;--mu:#6d6788;--ac:#7c3aed;--ac2:#ec4899;--bd:#e3def5;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root{--bg:#13101f;--card:#1e1a30;--tx:#f1eefc;--mu:#a49fc0;--bd:#322c4d;color-scheme:dark}}
+*{box-sizing:border-box}
+body{margin:0;color:var(--tx);font:16px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;min-height:100vh;
+background:radial-gradient(900px 500px at 10% -10%,rgba(124,58,237,.35),transparent 60%),radial-gradient(800px 500px at 100% 10%,rgba(236,72,153,.28),transparent 60%),var(--bg);background-attachment:fixed}
+main{max-width:560px;margin:0 auto;padding:20px 16px 40px}
+.grad{background:linear-gradient(90deg,var(--ac),var(--ac2));-webkit-background-clip:text;background-clip:text;color:transparent}
+.logo{font-size:42px;font-weight:900;letter-spacing:-1.5px;text-align:center;margin-top:10px;line-height:1}
+.tag2{text-align:center;color:var(--mu);margin:6px 0 18px;font-weight:500}
+p{color:var(--mu);margin:4px 0 12px}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:22px;padding:18px;margin:12px 0;box-shadow:0 10px 30px rgba(0,0,0,.12)}
+button{font:inherit;font-weight:700;font-size:17px;border:0;border-radius:16px;padding:16px;width:100%;color:#fff;background:linear-gradient(90deg,var(--ac),var(--ac2));cursor:pointer;box-shadow:0 8px 22px rgba(236,72,153,.35);transition:transform .12s}
+button:active{transform:scale(.97)}button.sec{background:var(--card);color:var(--tx);border:1px solid var(--bd);box-shadow:none}
+input{font:inherit;width:100%;padding:13px;border-radius:16px;border:2px solid var(--bd);background:var(--bg);color:var(--tx);text-transform:uppercase;letter-spacing:4px;text-align:center;font-size:20px;font-weight:800;margin:8px 0}
+input:focus{outline:none;border-color:var(--ac2)}
+.code{font-size:44px;letter-spacing:8px;font-weight:900;text-align:center}
+.vids{position:relative;display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.tile{position:relative;aspect-ratio:3/4;border-radius:22px;overflow:hidden;background:#000;border:3px solid var(--bd);box-shadow:0 10px 30px rgba(0,0,0,.25)}
+.tile.on{border-color:var(--ac2);animation:pulse 1.2s infinite}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(236,72,153,.55)}50%{box-shadow:0 0 0 10px rgba(236,72,153,0)}}
+.tile video{width:100%;height:100%;object-fit:cover}.tile.me video{transform:scaleX(-1)}
+.tag{position:absolute;left:6px;bottom:6px;background:rgba(0,0,0,.6);color:#fff;font-size:12px;font-weight:700;padding:4px 10px;border-radius:10px}
+.vs{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:3;width:46px;height:46px;border-radius:50%;display:grid;place-items:center;font-weight:900;font-size:14px;color:#fff;background:linear-gradient(135deg,var(--ac),var(--ac2));border:3px solid var(--bg)}
+.timer{font-size:84px;font-weight:900;text-align:center;line-height:1}
+.row{display:flex;justify-content:space-between;font-size:14px;margin:6px 0}
+.bar{height:10px;background:var(--bd);border-radius:6px;overflow:hidden}.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--ac),var(--ac2))}
+.big{font-size:56px;font-weight:900;text-align:center}
+.win{border:2px solid var(--ac2);box-shadow:0 0 40px rgba(236,72,153,.35)}
+#resBox{animation:pop .5s cubic-bezier(.2,1.4,.4,1)}@keyframes pop{from{opacity:0;transform:translateY(16px) scale(.96)}to{opacity:1;transform:none}}
+.hide{display:none}.mu{color:var(--mu);font-size:13px}.c{text-align:center}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js"></script>
+</head>
+<body>
+<main>
+<div class="logo">MOG<span class="grad">BATTLE</span></div><div class="tag2">Чьё лицо мощнее? ⚔️</div>
+
+<section id="home">
+  <p class="c">Два человека, одно лобби. Оба 15 секунд смотрят в камеру, затем система измеряет лица и сравнивает по шкале 1–10 с десятыми долями.</p>
+  <div class="card"><button id="create">⚔️ Создать лобби</button></div>
+  <div class="card"><input id="codeIn" maxlength="5" placeholder="КОД"><button id="join" class="sec">Войти по коду</button></div>
+  <div id="homeErr" class="mu c"></div>
+</section>
+
+<section id="game" class="hide">
+  <div class="card"><div class="mu c">Код лобби</div><div class="code grad" id="codeShow">…</div><div class="mu c" id="status">Подключаемся…</div></div>
+  <div class="vids"><div class="vs">VS</div>
+    <div class="tile me" id="tMe"><video id="lv" autoplay playsinline muted></video><span class="tag">Вы</span></div>
+    <div class="tile" id="tRem"><video id="rv" autoplay playsinline></video><span class="tag">Соперник</span></div>
+  </div>
+  <div class="card hide" id="turnBox"><div class="mu c" id="turnTxt" style="font-size:15px;font-weight:600"></div><div class="timer grad" id="timer">15</div></div>
+  <div class="card hide" id="resBox"></div>
+  <button id="start" class="hide" style="margin-top:12px">⚔️ Начать баттл</button>
+  <div id="err" class="mu" style="margin-top:10px"></div>
+</section>
+</main>
+
+<script type="module">
+import {FaceLandmarker,FilesetResolver} from "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/+esm";
+const $=s=>document.getElementById(s);
+const SUB={sym:["Симметрия лица",.3],har:["Гармония пропорций",.3],smile:["Улыбка и эмоции",.2],eyes:["Выразительность глаз",.2]};
+let peer,conn,stream,host=false,fl,code="",tmr,busy=false;
+const cl=x=>Math.max(1,Math.min(10,x)),r1=x=>Math.round(x*10)/10,sleep=ms=>new Promise(r=>setTimeout(r,ms));
+const gen=()=>{const a="ABCDEFGHJKMNPQRSTUVWXYZ23456789";let s="";for(let i=0;i<5;i++)s+=a[Math.floor(Math.random()*a.length)];return s};
+
+/* ---------- анализ лица (MediaPipe, на устройстве, без случайных чисел) ---------- */
+async function loadModel(){
+  if(fl)return;
+  const fs=await FilesetResolver.forVisionTasks("https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/wasm");
+  fl=await FaceLandmarker.createFromOptions(fs,{baseOptions:{modelAssetPath:"https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task"},runningMode:"IMAGE",numFaces:1,outputFaceBlendshapes:true});
+}
+function measure(v){
+  if(!fl||v.readyState<2||!v.videoWidth)return null;
+  const r=fl.detect(v),L=r.faceLandmarks[0];if(!L)return null;
+  const W=v.videoWidth,H=v.videoHeight,P=i=>({x:L[i].x*W,y:L[i].y*H});
+  const d=(a,b)=>Math.hypot(P(a).x-P(b).x,P(a).y-P(b).y);
+  const t=P(10),b=P(152),al=Math.hypot(b.x-t.x,b.y-t.y),ux={x:(b.x-t.x)/al,y:(b.y-t.y)/al},nx={x:-ux.y,y:ux.x};
+  const pr=[[33,263],[133,362],[61,291],[234,454],[70,300],[129,358],[93,323],[105,334]];let s=0;
+  for(const[a,c]of pr){const A=P(a),B=P(c);
+    const da=Math.abs((A.x-t.x)*nx.x+(A.y-t.y)*nx.y),db=Math.abs((B.x-t.x)*nx.x+(B.y-t.y)*nx.y);
+    const ha=(A.x-t.x)*ux.x+(A.y-t.y)*ux.y,hb=(B.x-t.x)*ux.x+(B.y-t.y)*ux.y;
+    s+=Math.abs(da-db)/(da+db)+Math.abs(ha-hb)/al*2}
+  const sym=cl(10-s/pr.length*45);
+  const u=d(10,168),m=d(168,2),l=d(2,152),tot=u+m+l;
+  const thirds=cl(10-(Math.abs(u/tot-1/3)+Math.abs(m/tot-1/3)+Math.abs(l/tot-1/3))*18);
+  const fr=cl(10-Math.abs(d(10,152)/d(234,454)-1.5)*7);
+  const es=cl(10-Math.abs(d(133,362)/((d(33,133)+d(362,263))/2)-1)*9);
+  const bs=(r.faceBlendshapes[0]?.categories||[]),g=n=>(bs.find(c=>c.categoryName===n)||{score:0}).score;
+  const smile=cl(5.5+Math.min(1,(g("mouthSmileLeft")+g("mouthSmileRight"))/2*1.6)*4.5);
+  const ear=(d(159,145)/d(33,133)+d(386,374)/d(362,263))/2;
+  return {sym,har:(thirds+fr+es)/3,smile,eyes:cl(10-Math.abs(ear-.3)*22)};
+}
+function pack(arr){
+  if(arr.length<3)return null;
+  const s={};let f=0;
+  for(const k in SUB){s[k]=r1(arr.reduce((a,x)=>a+x[k],0)/arr.length);f+=s[k]*SUB[k][1]}
+  return {f:r1(f),s};
+}
+
+/* ---------- лобби (PeerJS) ---------- */
+$("create").onclick=()=>enter(true);
+$("join").onclick=()=>{const c=$("codeIn").value.trim().toUpperCase();if(c.length<5){$("homeErr").textContent="Введите 5 символов кода";return}code=c;enter(false)};
+async function enter(create){
+  host=create;$("homeErr").textContent="";
+  if(!navigator.mediaDevices){$("homeErr").textContent="Нужен HTTPS-адрес (GitHub Pages подходит).";return}
+  try{stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:"user",width:640,height:480},audio:true})}
+  catch(e){$("homeErr").textContent="Разрешите доступ к камере и микрофону и попробуйте снова.";return}
+  $("home").classList.add("hide");$("game").classList.remove("hide");$("lv").srcObject=stream;
+  $("status").textContent="Загружаем модель лица…";
+  loadModel().then(()=>{if(!conn||!conn.open)$("status").textContent=host?"Ждём второго игрока… отправьте ему код":"Подключаемся…"}).catch(e=>{$("err").textContent="Не загрузилась модель анализа лица: "+e.message});
+  host?openHost():openGuest();
+}
+function openHost(){
+  code=gen();$("codeShow").textContent=code;
+  peer=new Peer("mogbattle-"+code);
+  peer.on("error",e=>{if(e.type==="unavailable-id"){peer.destroy();openHost()}else $("status").textContent="Ошибка сети: "+e.type});
+  peer.on("call",c=>{c.answer(stream);c.on("stream",rs=>$("rv").srcObject=rs)});
+  peer.on("connection",c=>{if(conn&&conn.open){c.close();return}setConn(c)});
+}
+function openGuest(){
+  $("codeShow").textContent=code;
+  peer=new Peer();
+  peer.on("error",e=>$("status").textContent=e.type==="peer-unavailable"?"Лобби с таким кодом не найдено":"Ошибка сети: "+e.type);
+  peer.on("open",()=>{
+    setConn(peer.connect("mogbattle-"+code,{reliable:true}));
+    const c=peer.call("mogbattle-"+code,stream);c.on("stream",rs=>$("rv").srcObject=rs);
+  });
+}
+function setConn(c){
+  conn=c;
+  c.on("open",()=>{$("status").textContent="Оба в сети. Камеры включены.";if(host&&!busy)$("start").classList.remove("hide")});
+  c.on("data",onData);
+  c.on("close",()=>{$("status").textContent="Соперник вышел";$("start").classList.add("hide")});
+}
+
+/* ---------- игра ---------- */
+$("start").onclick=runGame;
+function countdown(){
+  clearInterval(tmr);$("resBox").classList.add("hide");$("turnBox").classList.remove("hide");
+  $("tMe").classList.add("on");$("tRem").classList.add("on");$("turnTxt").textContent="15 секунд — смотрите в камеру оба!";
+  let t=15;$("timer").textContent=t;tmr=setInterval(()=>{t--;$("timer").textContent=Math.max(t,0);if(t<=0)clearInterval(tmr)},1000);
+}
+async function runGame(){
+  if(!fl){$("err").textContent="Модель ещё загружается, подождите пару секунд.";return}
+  busy=true;$("start").classList.add("hide");$("err").textContent="";
+  conn.send({t:"go"});countdown();
+  const A=[],B=[],end=Date.now()+15000;
+  while(Date.now()<end){
+    const a=measure($("lv")),b=measure($("rv"));if(a)A.push(a);if(b)B.push(b);await sleep(350);
+  }
+  clearInterval(tmr);$("tMe").classList.remove("on");$("tRem").classList.remove("on");$("turnBox").classList.add("hide");
+  const res={t:"result",a:pack(A),b:pack(B)};
+  conn.send(res);showRes(res);busy=false;
+}
+function onData(d){
+  if(d.t==="go")countdown();
+  if(d.t==="result"){clearInterval(tmr);$("tMe").classList.remove("on");$("tRem").classList.remove("on");$("turnBox").classList.add("hide");showRes(d)}
+}
+const esc=s=>String(s).replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));
+function showRes(d){
+  const me=host?d.a:d.b,ot=host?d.b:d.a;
+  let head;
+  if(!me||!ot)head=!me&&!ot?"Лица не найдены — встаньте ближе к свету":!me?"Ваше лицо не найдено в кадре":"Лицо соперника не найдено в кадре";
+  else head=me.f===ot.f?"Ничья!":me.f>ot.f?"Вы победили!":"Победил соперник";
+  const win=me&&ot?(me.f===ot.f?0:me.f>ot.f?1:-1):0;
+  const card=(t,o,w)=>o?`<div class="card ${w?"win":""}" style="margin:8px 0"><b>${t}${w?" 🏆":""}</b><div class="big grad">${o.f.toFixed(1)}</div>`+
+    Object.keys(SUB).map(k=>`<div class="row"><span>${SUB[k][0]}</span><span>${o.s[k].toFixed(1)}</span></div><div class="bar"><i style="width:${o.s[k]*10}%"></i></div>`).join("")+`</div>`
+    :`<div class="card" style="margin:8px 0"><b>${t}</b><p>Нет данных</p></div>`;
+  $("resBox").innerHTML=`<b style="display:block;text-align:center;font-size:24px;font-weight:900">${esc(head)}</b>`+card("Вы",me,win>0)+card("Соперник",ot,win<0)+
+    `<p class="mu">Игра для развлечения. Оценка считается по формуле из геометрии лица (симметрия, пропорции, улыбка, глаза): одно и то же лицо при одинаковых условиях даёт близкий результат. Освещение и ракурс влияют.</p>`;
+  $("resBox").classList.remove("hide");
+  if(host){$("start").textContent="⚔️ Сыграть ещё раз";$("start").classList.remove("hide")}
+}
+</script>
+</body>
+</html>
